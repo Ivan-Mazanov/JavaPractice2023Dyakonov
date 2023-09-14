@@ -5,6 +5,7 @@ import dict.io.FileIO;
 import dict.io.FileType;
 import dict.model.Dictionary;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +26,14 @@ public class DictService {
     }
 
     public boolean initializeDict(String dictName, String filePath, Predicate<String> validationFunc) {
-        HashMap<String, String> hashMap = fIleIO.getDataFromFile(filePath);
+        HashMap<String, String> content;
+        try {
+            content = fIleIO.getDataFromFile(filePath);
+        } catch (IOException e) {
+            return false;
+        }
 
-        Dictionary dictionary = new Dictionary(dictName, filePath, hashMap, validationFunc);
+        Dictionary dictionary = new Dictionary(dictName, filePath, content, validationFunc);
 
         return dictContainer.addDict(dictionary);
     }
@@ -45,24 +51,30 @@ public class DictService {
     public boolean addNewPair(String dictName, String key, String value) {
         if (key == null)
             return false;
-        return dictContainer.GetDict(dictName).addPair(key, value);
+        return dictContainer.getDict(dictName).addPair(key, value);
     }
 
     public String getDictString(String dictName) {
-        var dict = dictContainer.GetDict(dictName).getContent();
+        var dict = dictContainer.getDict(dictName).getContent();
 
         return getStringFromHashMap(dict, ":", System.lineSeparator());
     }
 
     public String findByKey(String dictName, String key) {
-        return dictContainer.GetDict(dictName).findByKey(key);
+        return dictContainer.getDict(dictName).findByKey(key);
     }
 
     public boolean deleteByKey(String dictName, String key) {
-        return dictContainer.GetDict(dictName).deleteByKey(key);
+        return dictContainer.getDict(dictName).deleteByKey(key);
     }
 
-    public void saveData(String dictName) {
-        fIleIO.loadDataInFile(dictContainer.GetDict(dictName));
+    public boolean saveData(String dictName) {
+        try {
+            fIleIO.loadDataInFile(dictContainer.getDict(dictName));
+            return true;
+
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

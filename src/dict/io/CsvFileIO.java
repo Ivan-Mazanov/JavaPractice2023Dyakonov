@@ -11,9 +11,9 @@ import static dict.service.Converter.getStringFromHashMap;
 //Файловый ввод/вывод для формата CSV
 public class CsvFileIO implements FileIO {
     @Override
-    public HashMap<String, String> getDataFromFile(String filePath) {
+    public HashMap<String, String> getDataFromFile(String filePath) throws IOException {
         if (!isValidFile(filePath))
-            throw new RuntimeException("Wrong file format. Use .csv instead");
+            throw new IOException("Wrong file format. Use .csv instead");
 
         StringBuilder fileContent = new StringBuilder();
         String line;
@@ -23,21 +23,17 @@ public class CsvFileIO implements FileIO {
             while ((line = bufferedReader.readLine()) != null) {
                 fileContent.append(line).append(System.lineSeparator());
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         return getHashMapFromString(fileContent.toString(), ",", System.lineSeparator());
     }
 
     @Override
-    public void loadDataInFile(Dictionary dictionary) {
+    public void loadDataInFile(Dictionary dictionary) throws IOException {
         String fileContent = getStringFromHashMap(dictionary.getContent(), ",", System.lineSeparator());
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(dictionary.getFilePath()))) {
             bufferedWriter.write(fileContent);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

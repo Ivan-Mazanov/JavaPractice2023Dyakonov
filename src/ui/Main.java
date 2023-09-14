@@ -17,7 +17,16 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Program is starting");
-        initializeCommandTemplate();
+
+        System.out.println(consoleUI.initializeDicts("latin", "src/file/latin-dict.csv",
+                k -> k.length() == 4 && k.matches("^[a-zA-Z]*$")));
+        System.out.println(consoleUI.initializeDicts("digit", "src/file/digit-dict.csv",
+                k -> k.length() == 5 && k.matches("^[0-9]*$")));
+
+        if (!initializeCommandTemplate("src/file/commands.csv")) {
+            System.out.println("Unable to load command list. Program is shutting down");
+            return;
+        }
 
         while (true) {
             System.out.println(System.lineSeparator() + "Please, input a command");
@@ -95,11 +104,11 @@ public class Main {
         }
     }
 
-    private static void initializeCommandTemplate() {
+    private static boolean initializeCommandTemplate(String filePath) {
         String line;
         String[] rawData = new String[4];
 
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/file/commands.csv"))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
 
             while ((line = bufferedReader.readLine()) != null) {
 
@@ -111,8 +120,11 @@ public class Main {
 
                 rawData[3] = null;
             }
+            return true;
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return false;
+
         }
     }
 }

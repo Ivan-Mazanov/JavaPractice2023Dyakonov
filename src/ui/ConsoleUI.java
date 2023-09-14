@@ -4,21 +4,15 @@ import dict.io.FileType;
 import dict.service.DictService;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 //Работа с DictService и отправка сообщений клиенту
 public class ConsoleUI {
-    private DictService dictService;
+    private static DictService dictService;
     private String currentDictName;
 
     public ConsoleUI() {
         dictService = new DictService(FileType.CSV);
-
-        dictService.initializeDict("latin", "src/file/latin-dict.csv",
-                k -> k.length() == 4 && k.matches("^[a-zA-Z]*$"));
-
-
-        dictService.initializeDict("digit", "src/file/digit-dict.csv",
-                k -> k.length() == 5 && k.matches("^[0-9]*$"));
     }
 
     public String getNames() {
@@ -82,17 +76,27 @@ public class ConsoleUI {
     }
 
     public String saveCurrentDict() {
-        dictService.saveData(currentDictName);
+        if (dictService.saveData(currentDictName))
+            return "Current dictionary was successfully saved";
 
-        return "Current dictionary was successfully saved";
+        return "Data saving was failed";
     }
 
     public String saveAllData() {
         List<String> names = dictService.getNames();
 
         for (String name : names) {
-            dictService.saveData(name);
+            if (!dictService.saveData(name))
+                return "Data saving was failed";
         }
+
         return "All data was successfully saved";
+    }
+
+    public String initializeDicts(String dictName, String filePath, Predicate<String> validationFunc) {
+        if (dictService.initializeDict(dictName, filePath, validationFunc))
+            return dictName.toUpperCase() + " were loaded in memory";
+
+        return "Unable to load " + dictName.toUpperCase() + " in memory";
     }
 }

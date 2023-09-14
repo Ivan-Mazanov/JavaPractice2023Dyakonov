@@ -17,7 +17,7 @@ class DictContainer {
         return false;
     }
 
-    public Dictionary GetDict(String dictName) {
+    public Dictionary getDict(String dictName) {
         for (Dictionary dictionary : content) {
 
             if (dictName.equals(dictionary.getDictionaryName()))
