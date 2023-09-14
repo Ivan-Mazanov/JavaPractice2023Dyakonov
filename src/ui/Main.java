@@ -1,56 +1,118 @@
 package ui;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 //Консольный ввод/вывод
 public class Main {
     private static ConsoleUI consoleUI = new ConsoleUI();
 
+    //Cписок шаблонов команд
+    private static List<CommandTemplate> commands = new ArrayList<>();
+
     public static void main(String[] args) {
         System.out.println("Program is starting");
+        initializeCommandTemplate();
 
         while (true) {
             System.out.println(System.lineSeparator() + "Please, input a command");
 
-            String commandString = new Scanner(System.in).nextLine();
+            String[] dividedCommandLine = new Scanner(System.in).nextLine().split(" ");
 
+            if (!isCommandCorrect(dividedCommandLine)) {
+                System.out.println("Unknown command. Use \"/help\" to see a list of available commands");
+                continue;
+            }
+
+            if (!isCorrectAmountOfArgs(dividedCommandLine)) {
+                System.out.println("Wrong amount of args. Use \"/help\" to see a list of available commands");
+                continue;
+            }
 
             String[] commandLine = new String[3];
-            String[] splittedCommandLine = commandString.split(" ");
+            System.arraycopy(dividedCommandLine, 0, commandLine, 0, dividedCommandLine.length);
 
-            System.arraycopy(splittedCommandLine, 0, commandLine, 0, splittedCommandLine.length);
-
-            String command = commandLine[0];
-            String firstArg = commandLine[1];
-            String secondArg = commandLine[2];
-
-
-            if (command.equals("/exit")) {
+            if (commandLine[0].equals("/exit")) {
                 System.out.println(consoleUI.saveAllData());
                 System.out.println("Program is shutting down");
                 break;
             }
 
-            switch (command) {
-                case "/help" -> System.out.println("""
-                        /exit - shut down the program
-                        /help - show command list
-                        /names - show names of all dictionaries
-                        /switch <dict's name> - start working with specified dictionary
-                        /show - show specified dictionary
-                        /delete <key> - delete "key - value" pair from specified dictionary
-                        /find <key> - find value from specified dictionary
-                        /add  <key> <value> - add "key - value" pair from specified dictionary
-                        /save - save current dictionary""");
-                case "/names" -> System.out.println(consoleUI.getNames());
-                case "/switch" -> System.out.println(consoleUI.switchSpecifiedDict(firstArg));
-                case "/show" -> System.out.println(consoleUI.getCurrentDict());
-                case "/delete" -> System.out.println(consoleUI.deleteFromCurrentDict(firstArg));
-                case "/find" -> System.out.println(consoleUI.findInCurrentDict(firstArg));
-                case "/add" -> System.out.println(consoleUI.addInCurrentDict(firstArg, secondArg));
-                case "/save" -> System.out.println(consoleUI.saveCurrentDict());
-                default -> System.out.println("Unknown command");
+            String output = executeCommand(commandLine);
+
+            System.out.println(output);
+        }
+    }
+
+    private static boolean isCommandCorrect(String[] dividedCommandLine) {
+        for (CommandTemplate template : commands) {
+            if (template.getCommandName().equals(dividedCommandLine[0]))
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean isCorrectAmountOfArgs(String[] dividedCommandLine) {
+        for (CommandTemplate template : commands) {
+            if (template.getCommandName().equals(dividedCommandLine[0]))
+                return template.getAmountOfArgs() == dividedCommandLine.length - 1;
+        }
+        return false;
+    }
+
+    private static String executeCommand(String[] commandLine) {
+        switch (commandLine[0]) {
+            case "/help":
+                StringBuilder helpString = new StringBuilder();
+                for (CommandTemplate commandTemplate : commands) {
+                    helpString.append(System.lineSeparator()).append(commandTemplate.getCommandName()).append(" - ")
+                            .append(commandTemplate.getCommandDescription()).append(System.lineSeparator())
+                            .append("Args: ").append(Arrays.toString(commandTemplate.getArgsNames()))
+                            .append(System.lineSeparator());
+                }
+                return helpString.toString();
+            case "/names":
+                return consoleUI.getNames();
+            case "/switch":
+                return consoleUI.switchSpecifiedDict(commandLine[1]);
+            case "/show":
+                return consoleUI.getCurrentDict();
+            case "/delete":
+                return consoleUI.deleteFromCurrentDict(commandLine[1]);
+            case "/find":
+                return consoleUI.findInCurrentDict(commandLine[1]);
+            case "/add":
+                return consoleUI.addInCurrentDict(commandLine[1], commandLine[2]);
+            case "/save":
+                return consoleUI.saveCurrentDict();
+            default:
+                return "Unknown command. Use \"/help\" to see a list of available commands";
+        }
+    }
+
+    private static void initializeCommandTemplate() {
+        String line;
+        String[] rawData = new String[4];
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/file/commands.csv"))) {
+
+            while ((line = bufferedReader.readLine()) != null) {
+
+                String[] fileLine = line.split(",");
+                System.arraycopy(fileLine, 0, rawData, 0, fileLine.length);
+
+                commands.add(new CommandTemplate(rawData[0], Integer.parseInt(rawData[1]),
+                        rawData[2], rawData[3] != null ? rawData[3].split(" ") : null));
+
+                rawData[3] = null;
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

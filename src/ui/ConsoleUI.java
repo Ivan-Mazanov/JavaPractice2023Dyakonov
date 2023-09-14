@@ -1,6 +1,6 @@
 package ui;
 
-import dict.dataProvider.FileType;
+import dict.io.FileType;
 import dict.service.DictService;
 
 import java.util.List;
@@ -13,11 +13,11 @@ public class ConsoleUI {
     public ConsoleUI() {
         dictService = new DictService(FileType.CSV);
 
-        dictService.initializeDict("latin", "src/dicts list/latin-dict.csv",
+        dictService.initializeDict("latin", "src/file/latin-dict.csv",
                 k -> k.length() == 4 && k.matches("^[a-zA-Z]*$"));
 
 
-        dictService.initializeDict("digit", "src/dicts list/digit-dict.csv",
+        dictService.initializeDict("digit", "src/file/digit-dict.csv",
                 k -> k.length() == 5 && k.matches("^[0-9]*$"));
     }
 
