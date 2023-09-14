@@ -28,7 +28,31 @@ public class Main {
             return;
         }
 
-        while (true) {
+        startProgramCycle();
+
+        System.out.println("Program is shutting down");
+    }
+
+    private static boolean isCommandCorrect(String[] dividedCommandLine) {
+        for (CommandTemplate template : commands) {
+            if (template.getCommandName().equals(dividedCommandLine[0]))
+                return true;
+        }
+        return false;
+    }
+
+    private static boolean isCorrectAmountOfArgs(String[] dividedCommandLine) {
+        for (CommandTemplate template : commands) {
+            if (template.getCommandName().equals(dividedCommandLine[0]))
+                return template.getAmountOfArgs() == dividedCommandLine.length - 1;
+        }
+        return false;
+    }
+
+    private static void startProgramCycle() {
+        boolean isRunning = true;
+
+        while (isRunning) {
             System.out.println(System.lineSeparator() + "Please, input a command");
 
             String[] dividedCommandLine = new Scanner(System.in).nextLine().split(" ");
@@ -48,30 +72,15 @@ public class Main {
 
             if (commandLine[0].equals("/exit")) {
                 System.out.println(consoleUI.saveAllData());
-                System.out.println("Program is shutting down");
-                break;
+
+                isRunning = false;
+                continue;
             }
 
             String output = executeCommand(commandLine);
 
             System.out.println(output);
         }
-    }
-
-    private static boolean isCommandCorrect(String[] dividedCommandLine) {
-        for (CommandTemplate template : commands) {
-            if (template.getCommandName().equals(dividedCommandLine[0]))
-                return true;
-        }
-        return false;
-    }
-
-    private static boolean isCorrectAmountOfArgs(String[] dividedCommandLine) {
-        for (CommandTemplate template : commands) {
-            if (template.getCommandName().equals(dividedCommandLine[0]))
-                return template.getAmountOfArgs() == dividedCommandLine.length - 1;
-        }
-        return false;
     }
 
     private static String executeCommand(String[] commandLine) {
