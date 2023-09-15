@@ -1,0 +1,3 @@
+latin,src/file/dictionaries/digit-dict.csv,^[a-zA-Z]{4}$
+digit,src/file/dictionaries/latin-dict.csv,^[0-9]{5}$
+symbol,src/file/dictionaries/symbol-dict.csv,^[\W]{3}$
