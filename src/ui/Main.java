@@ -1,32 +1,36 @@
 package ui;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
+import ui.init.commands.CommandTemplate;
+import ui.init.commands.CommandsOptionsInitializer;
+import ui.init.dictionaries.DictionariesOptionsInitializer;
+
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 //Консольный ввод/вывод
 public class Main {
     private static ConsoleUI consoleUI = new ConsoleUI();
-
-    //Cписок шаблонов команд
-    private static List<CommandTemplate> commands = new ArrayList<>();
+    private static CommandsOptionsInitializer commandsOptionsInitializer = new CommandsOptionsInitializer();
+    private static DictionariesOptionsInitializer dictionariesOptionsInitializer = new DictionariesOptionsInitializer();
 
     public static void main(String[] args) {
         System.out.println("Program is starting");
 
-        System.out.println(consoleUI.initializeDicts("latin", "src/file/latin-dict.csv",
-                k -> k.length() == 4 && k.matches("^[a-zA-Z]*$")));
-        System.out.println(consoleUI.initializeDicts("digit", "src/file/digit-dict.csv",
-                k -> k.length() == 5 && k.matches("^[0-9]*$")));
+        boolean initCommandsResult = commandsOptionsInitializer.
+                initOptions("src/file/options/commands.csv");
+        System.out.println(commandsOptionsInitializer.getMessage());
 
-        if (!initializeCommandTemplate("src/file/commands.csv")) {
-            System.out.println("Unable to load command list. Program is shutting down");
+        if (!initCommandsResult)
             return;
-        }
+
+
+        boolean initDictionariesResult = dictionariesOptionsInitializer.
+                initOptions("src/file/options/dict-options.csv");
+        System.out.println(dictionariesOptionsInitializer.getMessage());
+
+        if (!initDictionariesResult)
+            return;
+
 
         startProgramCycle();
 
@@ -34,7 +38,7 @@ public class Main {
     }
 
     private static boolean isCommandCorrect(String[] dividedCommandLine) {
-        for (CommandTemplate template : commands) {
+        for (CommandTemplate template : commandsOptionsInitializer.getCommands()) {
             if (template.getCommandName().equals(dividedCommandLine[0]))
                 return true;
         }
@@ -42,7 +46,7 @@ public class Main {
     }
 
     private static boolean isCorrectAmountOfArgs(String[] dividedCommandLine) {
-        for (CommandTemplate template : commands) {
+        for (CommandTemplate template : commandsOptionsInitializer.getCommands()) {
             if (template.getCommandName().equals(dividedCommandLine[0]))
                 return template.getAmountOfArgs() == dividedCommandLine.length - 1;
         }
@@ -87,7 +91,7 @@ public class Main {
         switch (commandLine[0]) {
             case "/help":
                 StringBuilder helpString = new StringBuilder();
-                for (CommandTemplate commandTemplate : commands) {
+                for (CommandTemplate commandTemplate : commandsOptionsInitializer.getCommands()) {
                     helpString.append(System.lineSeparator()).append(commandTemplate.getCommandName()).append(" - ")
                             .append(commandTemplate.getCommandDescription()).append(System.lineSeparator())
                             .append("Args: ").append(Arrays.toString(commandTemplate.getArgsNames()))
@@ -110,30 +114,6 @@ public class Main {
                 return consoleUI.saveCurrentDict();
             default:
                 return "Unknown command. Use \"/help\" to see a list of available commands";
-        }
-    }
-
-    private static boolean initializeCommandTemplate(String filePath) {
-        String line;
-        String[] rawData = new String[4];
-
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
-
-            while ((line = bufferedReader.readLine()) != null) {
-
-                String[] fileLine = line.split(",");
-                System.arraycopy(fileLine, 0, rawData, 0, fileLine.length);
-
-                commands.add(new CommandTemplate(rawData[0], Integer.parseInt(rawData[1]),
-                        rawData[2], rawData[3] != null ? rawData[3].split(" ") : null));
-
-                rawData[3] = null;
-            }
-            return true;
-
-        } catch (IOException e) {
-            return false;
-
         }
     }
 }

@@ -1,0 +1,9 @@
+/exit,shut down the program and save data,
+/help,show command list,
+/names,show names of all dictionaries,
+/switch,start working with dictionary by use specified dictionary <name>,<name>
+/show,show current dictionary,
+/delete,delete "key - value" pair from specified dictionary,<key>
+/find,find value from specified dictionary,<key>
+/add,add "key - value" pair in specified dictionary,<key> <value>
+/save,save current dictionary,

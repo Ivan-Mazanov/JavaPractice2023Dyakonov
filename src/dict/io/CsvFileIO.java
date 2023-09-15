@@ -8,7 +8,9 @@ import java.util.HashMap;
 import static dict.service.Converter.getHashMapFromString;
 import static dict.service.Converter.getStringFromHashMap;
 
-//Файловый ввод/вывод для формата CSV
+/**
+ * File input/output for csv format
+ */
 public class CsvFileIO implements FileIO {
     @Override
     public HashMap<String, String> getDataFromFile(String filePath) throws IOException {

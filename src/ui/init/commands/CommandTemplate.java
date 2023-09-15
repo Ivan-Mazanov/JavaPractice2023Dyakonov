@@ -1,4 +1,4 @@
-package ui;
+package ui.init.commands;
 
 public class CommandTemplate {
     private String commandName;
